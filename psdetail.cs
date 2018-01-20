@@ -381,7 +381,7 @@ public class PSDETAIL
             try {
             	foreach (ManagementObject queryObj in searcher.Get())
             	{             arc = Convert.ToString(queryObj["OSArchitecture"]);
-            				  psdWriteLine("**D** OSArchitecture: {0}", arc);
+            				  //psdWriteLine("**D** OS Architecture: {0}", arc);
             				  if (Convert.ToString(queryObj["OSArchitecture"])=="64-bit") isWin64=true;
             				  else isWin64=false;
             				  return;
@@ -417,8 +417,11 @@ public class PSDETAIL
 			bool bExe;
 			string sMatch;
 			string sFull="";
+			string sCmd="";
 			string sMemW;
 			string sMemV;
+            string w_search="";
+            string query_names="";			
 			
         	string ComputerName = "localhost";
 			ManagementScope Scope;  			
@@ -436,8 +439,6 @@ public class PSDETAIL
             // -------------------
             // Get process details
             // -------------------
-            string w_search="";
-            string query_names="";
             if (! string.IsNullOrEmpty(p_pid))
             { 
             	w_search="SELECT * FROM Win32_Process Where " + neg + "ProcessId='" + p_pid + "'";
@@ -468,10 +469,16 @@ public class PSDETAIL
 					#endif
             	}
             	else if (p_cmd)
-            	{ 
-					w_search="SELECT * FROM Win32_Process Where " + neg + "CommandLine like '%" + p_name + "%' AND NOT ProcessId = '" + myPID + "'";
+            	{ 	// prepare seasrch string for WMI query: 
+            		sCmd=Regex.Replace(p_name, @"\\", "\\\\");
+					w_search="SELECT * FROM Win32_Process Where " + neg + "CommandLine like '%" + sCmd + "%' AND NOT ProcessId = '" + myPID + "'";
+					#if(DEBUG)
+					Console.WriteLine("***D*** Searching for command line (regexed): [" + sCmd + "]");
+					#endif
             	}
-            	else // ...search for process names:
+            	else
+            	{
+            		// ...search for process names:
             		if (apps==null)
             		{
             			query_names = "Name like '" + p_name + "'";
@@ -484,13 +491,17 @@ public class PSDETAIL
             		}
             		w_search="SELECT * FROM Win32_Process Where " + neg + "(" + query_names +")";
             		#if(DEBUG)
-					Console.WriteLine("***D*** Query: [" + w_search + "]");
-					#endif		
+					Console.WriteLine("***D*** Searching for process(es): [" + p_name + "]");
+					#endif
+            	}
             }
             else
             {
             	w_search="SELECT * FROM Win32_Process Where Name like '%'";
             }
+            #if(DEBUG)
+			Console.WriteLine("***D*** Query: [" + w_search + "]");
+			#endif	
             ObjectQuery Query = new ObjectQuery(w_search);
             ManagementObjectSearcher Searcher = new ManagementObjectSearcher(Scope, Query);
 			
