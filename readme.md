@@ -2,7 +2,7 @@
 -----
 
 **<code>psDetail</code>** ist ein Konsolenprogramm im Stile der Werkzeuge
-der [Sysinternals-Suite](https://docs.microsoft.com/en-us/sysinternals/){:target="_blank"}.  
+der [Sysinternals-Suite](https://docs.microsoft.com/en-us/sysinternals/).  
 Es liefert Details zu angefragten Prozessen und erlaubt es diese auch gleich
 zu beenden.
 
