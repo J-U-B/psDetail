@@ -1,20 +1,20 @@
 // =========================================================
 // Description: more details about running processes
 // Author: Jens Boettge <jub-git@mpi-halle.mpg.de>
-// Date: Dec. 2012 - 03.07.2013
-// Update 0.1.10.0dev: 2018-01-20
-// Release: siehe unten
-
+// Date: Dec. 2012 - 2019
 // =========================================================
 
 /* ==================== CHANGELOG ====================
-* 0.1.10.0dev
- * zulaessige Laege fuer Request-String 'process name' auf 255 Zeichen verlaengert
- * "|" zulaessiges Zeichen als Listentrenner fuer 'process name'
- * Feature: 'name' darf auch Liste von Prozessen sein; Bsp.: "cmd.exe|cons%.exe"
+* 0.1.11.0dev - 2019-01
+ * neue Option: -b 32|64	show only 32 or 64 bit processes
+  
+* 0.1.10.0dev - 2018-01-20
+	* zulaessige Laege fuer Request-String 'process name' auf 255 Zeichen verlaengert
+	* "|" zulaessiges Zeichen als Listentrenner fuer 'process name'
+	* Feature: 'name' darf auch Liste von Prozessen sein; Bsp.: "cmd.exe|cons%.exe"
   
 * 0.1.9.0dev
- * neuer Parameter -c : Suche nach (Bestandteil) kompletter Commandline
+	* neuer Parameter -c : Suche nach (Bestandteil) kompletter Commandline
 
 * 0.1.8.3dev
 	* Behandlung nicht existierender Pfad fuer Log-File
@@ -65,7 +65,7 @@ public class PSDETAIL
 	);
 	
 	
-	const string VER="0.1.10.0dev";
+	const string VER="0.1.11.0dev";
 	private static string applic = null;		// process name, executable or (part of) commandline
 	private static string[] apps = null;		// list of process names
 	private static bool full_exe =false;		// searching or executable?
@@ -73,20 +73,22 @@ public class PSDETAIL
 	private static string log = null;
 	private static string pid = null;
 	private static string user = null;
+	private static string arch = null;
 	private static string neg = "";
 	private static bool neg_user = false;			// negate search for processes for user
-	public  static string[] valid_params = new string[] {"n", "e", "c", "p", "u", "r", "k", "h", "l", "x", "y", "help", "?"};
+	public  static string[] valid_params = new string[] {"n", "e", "c", "p", "b", "u", "r", "k", "h", "l", "x", "y", "help", "?"};
 	private static bool retPID = false;
 	private static bool pKill = false;
 	private static int wait_limit=2000;
 	private static int errorlevel;
 	private static bool isWin64 = false;
 	public  static int myPID = Process.GetCurrentProcess().Id;
+	const string ABOUT = "psdetail v" + VER + " for MPIMSP by Jens Boettge\n";
 	
 	public static void Main(string[] args)
 	{
 		psdWriteLine("--------------------------------------------------");
-		psdWriteLine("psdetail v" + VER + " for MPIMSP by CSG/JUB\n");
+		psdWriteLine(ABOUT);
 		psdWriteLine("*** Arguments: [" + string.Join("|",args)+"]");
 		//foreach (string s in args) { psdWriteLine("\t'"+s+"'");}
 		psdWriteLine("--------------------------------------------------");	
@@ -153,6 +155,22 @@ public class PSDETAIL
 				Environment.Exit(-1);
 			}
 		}  
+        
+        if (CL.isSet("b"))
+		{	Regex r = new Regex(@"^\d+$", RegexOptions.IgnoreCase);
+      		Match m = r.Match(CL["b"]);
+			if (m.Success) arch = CL["b"];				
+			else
+			{
+				print_help("Requested value for architecture is not numeric");
+				Environment.Exit(-1);
+			}
+			if ((arch != "32") && (arch != "64"))
+			{
+				print_help("Valid value for architecture filter is either '32' or '64' ...however: '"+arch+"' is invalid!");
+				Environment.Exit(-1);
+			}
+		}         
         
         if (CL.isSet("n"))
 		{	// modify is neccessary:
@@ -284,14 +302,16 @@ public class PSDETAIL
 		psdWriteLine("**D** cmdline     = [{0:S}]", match_cmdline);
 		psdWriteLine("**D** pid         = [{0:S}]", pid);
 		psdWriteLine("**D** user        = [{0:S}]", user);
+		psdWriteLine("**D** arch        = [{0:S}]", arch);
 		if (log != null) { psdWriteLine("**D** log file   = [{0:S}]", log); }
 		#endif
 		getOSArchitecture();
 		if (isWin64) psdWriteLine("**D** OS Architecture: 64-bit");
 		else psdWriteLine("**D** OS Architecture: 32-bit ");
+		if ((!isWin64) && (arch == "64"))  psdWriteLine("**W** You really expect a 64-bit application on a 32-bit OS???");
 		
 		//-------------------------------------------------
-		ProcDetail(applic,apps,pid,user,full_exe,match_cmdline);
+		ProcDetail(applic,apps,pid,arch,user,full_exe,match_cmdline);
 		//-------------------------------------------------		
 	}
 
@@ -309,7 +329,7 @@ public class PSDETAIL
 	
 	static void print_help(string msg = null)
 	{
-		psdWriteLine("psdetail v" + VER + " for MPIMSP by CSG/JUB\n");
+		psdWriteLine(ABOUT);
 		if (msg != null)
 		{
 			psdWriteLine("-----");
@@ -318,7 +338,7 @@ public class PSDETAIL
 		}
 		psdWriteLine("Usage:");
 		psdWriteLine("\tpsdetail.exe name|pid");
-		psdWriteLine("\tpsdetail.exe [-h] [-n name | -e executable | -c commandline(part)| -p pid] [-u user]\n");			
+		psdWriteLine("\tpsdetail.exe [-h] [-n name | -e executable | -c commandline(part)| -p pid] [-u user] [-b 32|64]\n");			
 		psdWriteLine("\t-h\t\tprint this help");	
 		psdWriteLine("\t-n name\t\tretrieve details for process with this name");
 		psdWriteLine("\t\t\t(use double quotes for strings with more process names,");
@@ -328,6 +348,7 @@ public class PSDETAIL
 		psdWriteLine("\t-c commandline\tretrieve details for process which commandline matches the argument");
 		psdWriteLine("\t\t\t(use double quotes for strings with spaces)");								
 		psdWriteLine("\t-p pid\t\tretrieve details for process with this process id");
+		psdWriteLine("\t-b 32|64\tshow only 32 or 64 bit processes");
 		psdWriteLine("\t-u user\t\tprocesses only for this user (without domain)");
 		psdWriteLine("\t-x\t\tnegate search request (except for user)");
 		psdWriteLine("\t-y\t\tnegate search for user");
@@ -401,7 +422,7 @@ public class PSDETAIL
         }		
 	}
 
-	static void ProcDetail(string p_name="", String[] apps=null, string p_pid="", string p_user="", bool p_full=false, bool p_cmd=false)
+	static void ProcDetail(string p_name="", String[] apps=null, string p_pid="", string p_arch="", string p_user="", bool p_full=false, bool p_cmd=false)
     {	if (string.IsNullOrEmpty(p_name) && string.IsNullOrEmpty(p_pid)&& string.IsNullOrEmpty(p_user))
     	{ 	print_help("no parameters given to function ProcDetail"); 
     		Environment.Exit(-10);
@@ -420,6 +441,7 @@ public class PSDETAIL
 			string sCmd="";
 			string sMemW;
 			string sMemV;
+			string sProcessHandle="";
             string w_search="";
             string query_names="";			
 			
@@ -567,8 +589,53 @@ public class PSDETAIL
 				}
 				
 				
-				cnt++;				
+				// -------------------------
+				// filter Architecture
+				// -------------------------
+				lastPID=Convert.ToInt32(WmiObject["ProcessId"]);
+				bool isWow64 = false;
+ 				if ((System.Environment.OSVersion.Version.Major == 5 && System.Environment.OSVersion.Version.Minor >= 1) ||
+       				System.Environment.OSVersion.Version.Major > 5)
+ 				{	try
+					{ 
+						//SafeProcessHandle processHandle = GetProcessHandle((uint)System.Diagnostics.Process.GetCurrentProcess().Id);
+	      				//SafeProcessHandle processHandle = Process.GetProcessById((int)WmiObject["ProcessId"]);
+	      				Process processHandle = Process.GetProcessById(Convert.ToInt32(WmiObject["ProcessId"]));
+      					// sProcessHandle = String.Format("\tProcess Handle : " + processHandle.Handle);
+      					sProcessHandle = String.Format("{0:S}" , processHandle.Handle);
+					
+	      				bool retVal;
+	      				if (!IsWow64Process(processHandle.Handle, out retVal))
+	      				{
+	      					throw new Win32Exception(Marshal.GetLastWin32Error());
+	      				}
+	      				isWow64 = retVal;
+					}					
+					catch(Exception ex)
+					{ 	//sProcessHandle = String.Format("\tProcess Handle : {{{{{0:S} \b}}}}", ex.Message);
+						sProcessHandle = String.Format("{{{{{0:S} \b}}}}", ex.Message);
+					}
+ 				}
+				if (!string.IsNullOrEmpty(p_arch))
+				{
+					switch (p_arch)
+				      {
+				          case "32":
+							if (isWin64 && (!isWow64)) continue;
+							break;
+				          case "64":
+				          	if ((isWow64) || (!isWin64)) continue;
+				            break;
+				          default:
+				            break;
+				      }
+					//if (isWow64) psdWriteLine("\tArchitecture   : W32 on W64");
+					//else if (isWin64) psdWriteLine("\tArchitecture   : native 64 bit");
+					//else psdWriteLine("\tArchitecture   : native 32 bit");				
+				}
 				
+				
+				cnt++;				
 				// ------------------------
 				// Display process details
 				// ------------------------
@@ -597,28 +664,8 @@ public class PSDETAIL
 				psdWriteLine("\tVirtual size   : " + sMemV);
 				
 				if (exe == "") { psdWriteLine("\tSystem process"); }
-				lastPID=Convert.ToInt32(WmiObject["ProcessId"]);
-				bool isWow64 = false;
- 				if ((System.Environment.OSVersion.Version.Major == 5 && System.Environment.OSVersion.Version.Minor >= 1) ||
-       				System.Environment.OSVersion.Version.Major > 5)
- 				{	try
-					{ 
-						//SafeProcessHandle processHandle = GetProcessHandle((uint)System.Diagnostics.Process.GetCurrentProcess().Id);
-	      				//SafeProcessHandle processHandle = Process.GetProcessById((int)WmiObject["ProcessId"]);
-	      				Process processHandle = Process.GetProcessById(Convert.ToInt32(WmiObject["ProcessId"]));
-      					psdWriteLine("\tProcess Handle : " + processHandle.Handle);
-					
-	      				bool retVal;
-	      				if (!IsWow64Process(processHandle.Handle, out retVal))
-	      				{
-	      					throw new Win32Exception(Marshal.GetLastWin32Error());
-	      				}
-	      				isWow64 = retVal;
-					}					
-					catch(Exception ex)
-					{ psdWriteLine("\tProcess Handle : {{{{{0:S} \b}}}}", ex.Message);
-					}
- 				}
+
+				psdWriteLine("\tProcess Handle : " + sProcessHandle);
 				if (isWow64) psdWriteLine("\tArchitecture   : W32 on W64");
 				else if (isWin64) psdWriteLine("\tArchitecture   : native 64 bit");
 				else psdWriteLine("\tArchitecture   : native 32 bit");
