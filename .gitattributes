@@ -5,6 +5,7 @@
 *.json                  text eol=lf
 *.log                   text eol=lf
 *.code-workspace        text eol=lf
+/LICENSE                text eol=lf
 /.vscode/settings.json  text eol=crlf
 
 
