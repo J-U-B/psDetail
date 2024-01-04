@@ -1,0 +1,196 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    //"terminal.integrated.automationProfile.windows": "PowerShell for VS 2022",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "msbuild",
+            "args": [
+                "psdetail4.csproj",
+                "-property:GenerateFullPaths=true",
+                "-t:clean,build",
+                "-toolsVersion:4.8.1",
+                "-detailedSummary:true",
+                "-p:'Configuration=Release;TargetFrameworkVersion=v4.8.1;PlatformTarget=anycpu;AppConfig=psdetail4.app.config'"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+
+        {
+            "label": "build psdetail4 - debug target 4.8",
+            "type": "shell",
+            "command": "msbuild",
+            "args": [
+                "psdetail4.csproj",
+                "/property:GenerateFullPaths=true",
+                "/t:clean,build",
+                "/consoleloggerparameters:NoSummary",
+                "-p:'Configuration=Debug;TargetFrameworkVersion=v4.8;PlatformTarget=anycpu'"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "msbuild",
+            "args": [
+                "psdetail4.csproj",
+                "/property:GenerateFullPaths=true",
+                "/t:clean,build",
+                //"/consoleloggerparameters:NoSummary",
+                "/p:Configuration='Release;TargetFrameworkVersion=v4.8.1;PlatformTarget=anycpu'"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+
+        {
+            "label": "build psdetail4 - debug target 4.8.1",
+            "type": "shell",
+            "command": "msbuild",
+            "args": [
+                "psdetail4.csproj",
+                "/property:GenerateFullPaths=true",
+                "/t:clean,build",
+                "/consoleloggerparameters:NoSummary",
+                "/p:Configuration='Debug;TargetFrameworkVersion=v4.8.1;PlatformTarget=anycpu'"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+
+        {
+            "label": "build psdetail4 - release target 4.8.1",
+            "type": "shell",
+            "command": "msbuild",
+            "args": [
+                "psdetail4.csproj",
+                "/property:GenerateFullPaths=true",
+                "/t:clean,build",
+                "/consoleloggerparameters:NoSummary",
+                "/p:Configuration='Release;TargetFrameworkVersion=v4.8.1;PlatformTarget=anycpu'"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+
+        {
+            "label": "build psdetail4 - release target 4.8",
+            "type": "shell",
+            "command": "msbuild",
+            "args": [
+                "psdetail4.csproj",
+                "/property:GenerateFullPaths=true",
+                "/t:clean,build",
+                "/consoleloggerparameters:NoSummary",
+                "/p:Configuration='Release;TargetFrameworkVersion=v4.8;PlatformTarget=anycpu'"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+
+        {
+            "label": "build psdetail - debug target 3.5",
+            "type": "shell",
+            "command": "msbuild",
+            "args": [
+                "psdetail.csproj",
+                "/property:GenerateFullPaths=true",
+                "/t:clean,build",
+                "/consoleloggerparameters:NoSummary",
+                "/p:Configuration='Debug;TargetFrameworkVersion=v3.5;PlatformTarget=anycpu'"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": "$msCompile"
+        },
+
+        {
+            "label": "build psdetail - release target 3.5",
+            "type": "shell",
+            "command": "msbuild",
+            "args": [
+                "psdetail.csproj",
+                "/property:GenerateFullPaths=true",
+                "/t:clean,build",
+                "/consoleloggerparameters:NoSummary",
+                "/p:Configuration='Release;TargetFrameworkVersion=v3.5;PlatformTarget=anycpu'"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": "$msCompile"
+        },
+
+        {
+            "label": "build all RELEASE",
+            "dependsOn": ["build psdetail4 - release target 4.8.1", "build psdetail - release target 3.5"]
+        },
+        {
+            "label": "build all DEBUG",
+            "dependsOn": ["build psdetail4 - debug target 4.8.1", "build psdetail - debug target 3.5"]
+        },
+        {
+            "label": "build ALL",
+            "dependsOn": ["build psdetail4 - debug target 4.8.1", "build psdetail - debug target 3.5",
+                          "build psdetail4 - release target 4.8.1", "build psdetail - release target 3.5"]
+        },
+    ]
+}

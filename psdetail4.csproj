@@ -7,8 +7,7 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>psdetail4</AssemblyName>
     <TargetFrameworkProfile />
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <SourceAnalysisOverrideSettingsFile>D:\Profiles\Administrator\Application Data\ICSharpCode/SharpDevelop4\Settings.SourceAnalysis</SourceAnalysisOverrideSettingsFile>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <NoWin32Manifest>False</NoWin32Manifest>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
     <NoStdLib>False</NoStdLib>
@@ -16,6 +15,7 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>False</RunCodeAnalysis>
+    <AppConfig>psdetail4.app.config</AppConfig>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <OutputPath>bin\Debug\</OutputPath>
@@ -68,7 +68,7 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
   <ItemGroup>
     <Reference Include="Microsoft.CSharp">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+      <RequiredTargetFramework>4.8.1</RequiredTargetFramework>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Management" />

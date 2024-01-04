@@ -1,0 +1,18 @@
+# Auto detect text files and perform LF normalization
+*                       text=auto
+*.txt                   text eol=lf
+*.md                    text eol=lf
+*.json                  text eol=lf
+*.log                   text eol=lf
+*.code-workspace        text eol=lf
+/.vscode/settings.json  text eol=crlf
+
+
+# Binaries
+*.zip	binary
+*.7z	binary
+*.exe	binary
+*.dll	binary
+*.png	binary
+*.jpg	binary
+*.pdf	binary
